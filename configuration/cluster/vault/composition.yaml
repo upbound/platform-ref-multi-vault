@@ -67,8 +67,13 @@ spec:
             policy:
               bindings:
                 - role: roles/iam.workloadIdentityUser
-                  members:
-                    - serviceAccount:crossplane-playground.svc.id.goog[vault-system/vault]
+      patches:
+        - fromFieldPath: spec.projectID
+          toFieldPath: spec.forProvider.policy.bindings[0].members[0]
+          transforms:
+            - type: string
+              string:
+                fmt: "serviceAccount:%s.svc.id.goog[vault-system/vault]"
     - base:
         apiVersion: storage.gcp.crossplane.io/v1alpha3
         kind: Bucket
@@ -156,7 +161,6 @@ spec:
               server:
                 extraEnvironmentVars:
                   GOOGLE_REGION: global
-                  GOOGLE_PROJECT: crossplane-playground
                   VAULT_CACERT: /vault/userconfig/vault-server-tls/ca.crt
                 extraVolumes:
                   - type: secret
@@ -189,23 +193,32 @@ spec:
         # All Helm releases derive the ProviderConfig to use from the XR.
         - fromFieldPath: spec.providerConfigRef.name
           toFieldPath: spec.providerConfigRef.name
+        - fromFieldPath: spec.projectID
+          toFieldPath: spec.forProvider.values.server.extraEnvironmentVars[GOOGLE_PROJECT]
         - fromFieldPath: metadata.name
           toFieldPath: spec.forProvider.values.server.extraContainers[0].env[0].value
-        - fromFieldPath: metadata.name
+        - type: FromManyCompositeFieldPaths
+          fromManyFieldPaths:
+            - spec.projectID
+            - metadata.name
           toFieldPath: spec.forProvider.values.server.extraContainers[0].env[1].value
           transforms:
             - type: string
               string:
-                fmt: "projects/crossplane-playground/locations/global/keyRings/vault-on-gke-keyring/cryptoKeys/%s"
-        - fromFieldPath: metadata.name
+                fmt: "projects/%s/locations/global/keyRings/vault-on-gke-keyring/cryptoKeys/%s"
+        - type: FromManyCompositeFieldPaths
+          fromManyFieldPaths:
+            - metadata.name
+            - spec.projectID
           toFieldPath: spec.forProvider.values.server.serviceAccount.annotations["iam.gke.io/gcp-service-account"]
           transforms:
             - type: string
               string:
-                fmt: "%s@crossplane-playground.iam.gserviceaccount.com"
+                fmt: "%s@%s.iam.gserviceaccount.com"
         - type: FromManyCompositeFieldPaths
           fromManyFieldPaths:
             - metadata.name
+            - spec.projectID
             - metadata.name
           toFieldPath: spec.forProvider.values.server.ha.config
           transforms:
@@ -225,7 +238,7 @@ spec:
                   ha_enabled = "true"
                   }
                   seal "gcpckms" {
-                  project     = "crossplane-playground"
+                  project     = "%s"
                   region      = "global"
                   key_ring    = "vault-on-gke-keyring"
                   crypto_key  = "%s"

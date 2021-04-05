@@ -20,6 +20,8 @@ spec:
           toFieldPath: metadata.name
         - fromFieldPath: spec.id
           toFieldPath: spec.id
+        - fromFieldPath: spec.projectID
+          toFieldPath: spec.projectID
         - fromFieldPath: spec.id
           toFieldPath: metadata.annotations[crossplane.io/external-name]
         - fromFieldPath: metadata.uid
@@ -42,5 +44,7 @@ spec:
       patches:
         - fromFieldPath: metadata.name
           toFieldPath: metadata.name
+        - fromFieldPath: spec.projectID
+          toFieldPath: spec.projectID
         - fromFieldPath: spec.id
           toFieldPath: spec.providerConfigRef.name

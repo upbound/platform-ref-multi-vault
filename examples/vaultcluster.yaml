@@ -7,6 +7,7 @@ spec:
     matchLabels:
       provider: GCP
   id: vault-on-gke-cluster-1
+  projectID: crossplane-playground
   parameters:
     nodes:
       count: 1

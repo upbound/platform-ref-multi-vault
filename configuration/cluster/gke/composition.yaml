@@ -34,8 +34,6 @@ spec:
             addonsConfig:
               gcePersistentDiskCsiDriverConfig:
                 enabled: true
-            workloadIdentityConfig:
-              identityNamespace: crossplane-playground.svc.id.goog
       patches:
         - fromFieldPath: metadata.uid
           toFieldPath: spec.writeConnectionSecretToRef.name
@@ -50,6 +48,12 @@ spec:
           toFieldPath: spec.forProvider.networkSelector.matchLabels[networks.gcp.vaultongke.crossplane.io/network-id]
         - fromFieldPath: "spec.parameters.networkRef.id"
           toFieldPath: spec.forProvider.subnetworkSelector.matchLabels[networks.gcp.vaultongke.crossplane.io/network-id]
+        - fromFieldPath: spec.projectID
+          toFieldPath: spec.forProvider.workloadIdentityConfig.identityNamespace
+          transforms:
+            - type: string
+              string:
+                fmt: "%s.svc.id.goog"
       # The control plane supplies the 'kubeconfig' connection secret key, which
       # is required by the XR.
       connectionDetails:
