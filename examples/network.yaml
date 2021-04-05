@@ -1,0 +1,11 @@
+apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+kind: Network
+metadata:
+  name: vault-on-gke-network-1
+spec:
+  id: vault-on-gke-network-1
+  clusterRef:
+    id: vault-on-gke-cluster-1
+  compositionSelector:
+    matchLabels:
+      provider: GCP

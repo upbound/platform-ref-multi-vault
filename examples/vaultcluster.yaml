@@ -1,0 +1,17 @@
+apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+kind: VaultCluster
+metadata:
+  name: vault-on-gke-cluster-1
+spec:
+  compositionSelector:
+    matchLabels:
+      provider: GCP
+  id: vault-on-gke-cluster-1
+  parameters:
+    nodes:
+      count: 1
+      size: small
+    networkRef:
+      id: vault-on-gke-network-1
+  writeConnectionSecretToRef:
+    name: cluster-conn

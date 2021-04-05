@@ -1,0 +1,234 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: vaults.gcp.vaultongke.crossplane.io
+  labels:
+    provider: helm
+spec:
+  writeConnectionSecretsToNamespace: crossplane-system
+  compositeTypeRef:
+    apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+    kind: Vaults
+  resources:
+    - base:
+        apiVersion: iam.gcp.crossplane.io/v1alpha1
+        kind: ServiceAccount
+        spec:
+          forProvider:
+            description: "sa used by vault to access bucket and cryptokey for auto unseal"
+      patches:
+        - fromFieldPath: metadata.name
+          toFieldPath: metadata.annotations[crossplane.io/external-name]
+        - fromFieldPath: metadata.name
+          toFieldPath: spec.forProvider.displayName
+          transforms:
+            - type: string
+              string:
+                fmt: "vault service account for cluster %s"
+    - base:
+        apiVersion: kms.gcp.crossplane.io/v1alpha1
+        kind: KeyRing
+        metadata:
+          annotations:
+            crossplane.io/external-name: vault-on-gke-keyring
+        spec:
+          forProvider:
+            location: global
+    - base:
+        apiVersion: kms.gcp.crossplane.io/v1alpha1
+        kind: CryptoKey
+        spec:
+          forProvider:
+            purpose: ENCRYPT_DECRYPT
+            keyRingSelector:
+              matchControllerRef: true
+      patches:
+        - fromFieldPath: metadata.name
+          toFieldPath: "metadata.annotations[crossplane.io/external-name]"
+    - base:
+        apiVersion: kms.gcp.crossplane.io/v1alpha1
+        kind: CryptoKeyPolicy
+        spec:
+          forProvider:
+            cryptoKeySelector:
+              matchControllerRef: true
+            policy:
+              bindings:
+                - role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+                  serviceAccountMemberSelector:
+                    matchControllerRef: true
+    - base:
+        apiVersion: iam.gcp.crossplane.io/v1alpha1
+        kind: ServiceAccountPolicy
+        spec:
+          forProvider:
+            serviceAccountSelector:
+              matchControllerRef: true
+            policy:
+              bindings:
+                - role: roles/iam.workloadIdentityUser
+                  members:
+                    - serviceAccount:crossplane-playground.svc.id.goog[vault-system/vault]
+    - base:
+        apiVersion: storage.gcp.crossplane.io/v1alpha3
+        kind: Bucket
+        spec:
+          location: US
+          storageClass: MULTI_REGIONAL
+      patches:
+        - fromFieldPath: metadata.name
+          toFieldPath: "metadata.annotations[crossplane.io/external-name]"
+    - base:
+        apiVersion: storage.gcp.crossplane.io/v1alpha1
+        kind: BucketPolicyMember
+        spec:
+          forProvider:
+            bucketSelector:
+              matchControllerRef: true
+            serviceAccountMemberSelector:
+              matchControllerRef: true
+            role: roles/storage.objectAdmin
+      patches:
+        - fromFieldPath: metadata.name
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-object-admin"
+    - base:
+        apiVersion: storage.gcp.crossplane.io/v1alpha1
+        kind: BucketPolicyMember
+        spec:
+          forProvider:
+            bucketSelector:
+              matchControllerRef: true
+            serviceAccountMemberSelector:
+              matchControllerRef: true
+            role: roles/storage.legacyBucketReader
+      patches:
+        - fromFieldPath: metadata.name
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "%s-legacy-reader"
+    - base:
+        apiVersion: helm.crossplane.io/v1beta1
+        kind: Release
+        metadata:
+          name: vault-tls
+          annotations:
+            crossplane.io/external-name: vault-tls
+        spec:
+          rollbackLimit: 3
+          forProvider:
+            namespace: vault-system
+            chart:
+              url: https://storage.googleapis.com/helm-repo-dev/vault-base-0.1.0.tgz
+            values: {}
+      patches:
+        # All Helm releases derive their labels and annotations from the XR.
+        - fromFieldPath: metadata.labels
+          toFieldPath: metadata.labels
+        - fromFieldPath: metadata.annotations
+          toFieldPath: metadata.annotations
+        # All Helm releases derive the ProviderConfig to use from the XR.
+        - fromFieldPath: spec.providerConfigRef.name
+          toFieldPath: spec.providerConfigRef.name
+    - base:
+        apiVersion: helm.crossplane.io/v1beta1
+        kind: Release
+        metadata:
+          name: vault-cluster
+          annotations:
+            crossplane.io/external-name: vault-cluster
+        spec:
+          rollbackLimit: 3
+          forProvider:
+            namespace: vault-system
+            chart:
+              name: vault
+              repository: https://helm.releases.hashicorp.com
+              version: 0.8.0
+            values:
+              global:
+                tlsDisable: false
+              server:
+                extraEnvironmentVars:
+                  GOOGLE_REGION: global
+                  GOOGLE_PROJECT: crossplane-playground
+                  VAULT_CACERT: /vault/userconfig/vault-server-tls/ca.crt
+                extraVolumes:
+                  - type: secret
+                    name: vault-server-tls
+                serviceAccount:
+                  create: true
+                  name: "vault"
+                standalone:
+                  enabled: false
+                ha:
+                  enabled: true
+                extraContainers:
+                  - name: vault-init
+                    image: registry.hub.docker.com/sethvargo/vault-init:0.2.0
+                    imagePullPolicy: Always
+                    volumeMounts:
+                      - mountPath: /vault/userconfig/vault-server-tls
+                        name: userconfig-vault-server-tls
+                    env:
+                      - name: GCS_BUCKET_NAME
+                      - name: KMS_KEY_ID
+                      - name: VAULT_CACERT
+                        value: /vault/userconfig/vault-server-tls/ca.crt
+      patches:
+        # All Helm releases derive their labels and annotations from the XR.
+        - fromFieldPath: metadata.labels
+          toFieldPath: metadata.labels
+        - fromFieldPath: metadata.annotations
+          toFieldPath: metadata.annotations
+        # All Helm releases derive the ProviderConfig to use from the XR.
+        - fromFieldPath: spec.providerConfigRef.name
+          toFieldPath: spec.providerConfigRef.name
+        - fromFieldPath: metadata.name
+          toFieldPath: spec.forProvider.values.server.extraContainers[0].env[0].value
+        - fromFieldPath: metadata.name
+          toFieldPath: spec.forProvider.values.server.extraContainers[0].env[1].value
+          transforms:
+            - type: string
+              string:
+                fmt: "projects/crossplane-playground/locations/global/keyRings/vault-on-gke-keyring/cryptoKeys/%s"
+        - fromFieldPath: metadata.name
+          toFieldPath: spec.forProvider.values.server.serviceAccount.annotations["iam.gke.io/gcp-service-account"]
+          transforms:
+            - type: string
+              string:
+                fmt: "%s@crossplane-playground.iam.gserviceaccount.com"
+        - type: FromManyCompositeFieldPaths
+          fromManyFieldPaths:
+            - metadata.name
+            - metadata.name
+          toFieldPath: spec.forProvider.values.server.ha.config
+          transforms:
+            - type: string
+              string:
+                fmt: |
+                  ui = false
+                  listener "tcp" {
+                  address = "[::]:8200"
+                  cluster_address = "[::]:8201"
+                  tls_cert_file = "/vault/userconfig/vault-server-tls/tls.crt"
+                  tls_key_file  = "/vault/userconfig/vault-server-tls/tls.key"
+                  tls_client_ca_file = "/vault/userconfig/vault-server-tls/ca.crt"
+                  }
+                  storage "gcs" {
+                  bucket     = "%s"
+                  ha_enabled = "true"
+                  }
+                  seal "gcpckms" {
+                  project     = "crossplane-playground"
+                  region      = "global"
+                  key_ring    = "vault-on-gke-keyring"
+                  crypto_key  = "%s"
+                  }
+
+
