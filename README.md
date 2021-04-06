@@ -1,11 +1,11 @@
 # Crossplane Configuration for HashiCorp Vault on GKE
 
-This Crossplane Configuration defines necessary compositions
-to run a highly available Vault on GKE backed by GCS bucket and configured to
-auto unseal with Cloud KMS using GCP workload identity.
+This Crossplane Configuration defines compositions to run
+a highly available Vault on GKE backed by a GCS bucket, configured to
+auto unseal with Cloud KMS and authenticate using GCP workload identity.
 
-It provides a platform API to provision fully configured GKE clusters,
-with secure networking, and a highly available Vault backed by GCS bucket and
+It provides a control plane API to provision fully configured GKE clusters,
+with secure networking, and a highly available Vault backed by a GCS bucket and
 configured to auto unseal with Cloud KMS using GCP workload identity -- all
 composed using cloud service primitives from the [Crossplane GCP
 Provider](https://doc.crds.dev/github.com/crossplane/provider-gcp). App
