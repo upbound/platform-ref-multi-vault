@@ -154,7 +154,7 @@ spec:
             chart:
               name: vault
               repository: https://helm.releases.hashicorp.com
-              version: 0.8.0
+              version: 0.19.0
             values:
               global:
                 tlsDisable: false
@@ -197,51 +197,52 @@ spec:
           toFieldPath: spec.forProvider.values.server.extraEnvironmentVars[GOOGLE_PROJECT]
         - fromFieldPath: metadata.name
           toFieldPath: spec.forProvider.values.server.extraContainers[0].env[0].value
-        - type: FromManyCompositeFieldPaths
-          fromManyFieldPaths:
-            - spec.projectID
-            - metadata.name
+        - type: CombineFromComposite
+          combine:
+            variables:
+            - fromFieldPath: spec.projectID
+            - fromFieldPath: metadata.name
+            strategy: string
+            string:
+              fmt: "projects/%s/locations/global/keyRings/vault-on-gke-keyring/cryptoKeys/%s"
           toFieldPath: spec.forProvider.values.server.extraContainers[0].env[1].value
-          transforms:
-            - type: string
-              string:
-                fmt: "projects/%s/locations/global/keyRings/vault-on-gke-keyring/cryptoKeys/%s"
-        - type: FromManyCompositeFieldPaths
-          fromManyFieldPaths:
-            - metadata.name
-            - spec.projectID
+        - type: CombineFromComposite
+          combine:
+            variables: 
+            - fromFieldPath: metadata.name
+            - fromFieldPath: spec.projectID
+            strategy: string
+            string:
+              fmt: "%s@%s.iam.gserviceaccount.com"
           toFieldPath: spec.forProvider.values.server.serviceAccount.annotations["iam.gke.io/gcp-service-account"]
-          transforms:
-            - type: string
-              string:
-                fmt: "%s@%s.iam.gserviceaccount.com"
-        - type: FromManyCompositeFieldPaths
-          fromManyFieldPaths:
-            - metadata.name
-            - spec.projectID
-            - metadata.name
+        - type: CombineFromComposite
+          combine:
+            variables:
+            - fromFieldPath: metadata.name
+            - fromFieldPath: spec.projectID
+            - fromFieldPath: metadata.name
+            strategy: string
+            string:
+              fmt: |
+                ui = false
+                listener "tcp" {
+                address = "[::]:8200"
+                cluster_address = "[::]:8201"
+                tls_cert_file = "/vault/userconfig/vault-server-tls/tls.crt"
+                tls_key_file  = "/vault/userconfig/vault-server-tls/tls.key"
+                tls_client_ca_file = "/vault/userconfig/vault-server-tls/ca.crt"
+                }
+                storage "gcs" {
+                bucket     = "%s"
+                ha_enabled = "true"
+                }
+                seal "gcpckms" {
+                project     = "%s"
+                region      = "global"
+                key_ring    = "vault-on-gke-keyring"
+                crypto_key  = "%s"
+                }
           toFieldPath: spec.forProvider.values.server.ha.config
-          transforms:
-            - type: string
-              string:
-                fmt: |
-                  ui = false
-                  listener "tcp" {
-                  address = "[::]:8200"
-                  cluster_address = "[::]:8201"
-                  tls_cert_file = "/vault/userconfig/vault-server-tls/tls.crt"
-                  tls_key_file  = "/vault/userconfig/vault-server-tls/tls.key"
-                  tls_client_ca_file = "/vault/userconfig/vault-server-tls/ca.crt"
-                  }
-                  storage "gcs" {
-                  bucket     = "%s"
-                  ha_enabled = "true"
-                  }
-                  seal "gcpckms" {
-                  project     = "%s"
-                  region      = "global"
-                  key_ring    = "vault-on-gke-keyring"
-                  crypto_key  = "%s"
-                  }
+                
 
 

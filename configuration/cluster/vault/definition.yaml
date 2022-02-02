@@ -23,8 +23,7 @@ spec:
                 description: Project ID of this Cluster that other objects will use to refer to it.
               providerConfigRef:
                 type: object
-                description: "A reference to the ProviderConfig of the cluster that Vault should
-                be deployed to."
+                description: "A reference to the ProviderConfig of the cluster that Vault should be deployed to."
                 properties:
                   name:
                     type: string
