@@ -11,16 +11,12 @@ spec:
     kind: GKE
   resources:
     - base:
-        apiVersion: container.gcp.crossplane.io/v1beta1
-        kind: GKECluster
+        apiVersion: container.gcp.crossplane.io/v1beta2
+        kind: Cluster
         spec:
           forProvider:
-            initialClusterVersion: "1.16"
+            initialClusterVersion: "1.22"
             location: us-west2
-            masterAuth:
-              # setting this master auth user name enables basic auth so that a client (e.g.,
-              # provider-helm), can connect with the generated kubeconfig from the connection secret
-              username: admin
             masterAuthorizedNetworksConfig:
               enabled: false
             ipAllocationPolicy:
@@ -49,7 +45,7 @@ spec:
         - fromFieldPath: "spec.parameters.networkRef.id"
           toFieldPath: spec.forProvider.subnetworkSelector.matchLabels[networks.gcp.vaultongke.crossplane.io/network-id]
         - fromFieldPath: spec.projectID
-          toFieldPath: spec.forProvider.workloadIdentityConfig.identityNamespace
+          toFieldPath: spec.forProvider.workloadIdentityConfig.workloadPool
           transforms:
             - type: string
               string:
@@ -61,7 +57,7 @@ spec:
     # Each cluster has one node pool. Its nodes are spread evenly across the zones
     # in which the cluster exists.
     - base:
-        apiVersion: container.gcp.crossplane.io/v1alpha1
+        apiVersion: container.gcp.crossplane.io/v1beta1
         kind: NodePool
         spec:
           forProvider:
@@ -85,7 +81,7 @@ spec:
               oauthScopes:
                 - https://www.googleapis.com/auth/cloud-platform
               workloadMetadataConfig:
-                nodeMetadata: GKE_METADATA_SERVER
+                mode: GKE_METADATA
             management:
               autoRepair: true
               autoUpgrade: false
@@ -117,6 +113,12 @@ spec:
             source: Secret
             secretRef:
               key: kubeconfig
+          identity:
+            type: GoogleApplicationCredentials
+            source: Secret
+            secretRef:
+              name: gcp-creds
+              key: credentials
       patches:
         - fromFieldPath: spec.id
           toFieldPath: metadata.name
@@ -130,5 +132,7 @@ spec:
             - type: string
               string:
                 fmt: "%s-gkecluster"
+        - fromFieldPath: spec.writeConnectionSecretToRef.namespace
+          toFieldPath: spec.identity.secretRef.namespace
       readinessChecks:
         - type: None

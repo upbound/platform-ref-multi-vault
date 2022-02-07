@@ -6,6 +6,19 @@ metadata:
     upbound.io/ui-schema: |-
       ---
       configSections:
+      - title: Project ID
+        description: Project ID of this Cluster
+        items:
+        - name: projectID
+          controlType: singleInput
+          type: string
+          path: ".spec.projectID"
+          title: Project ID
+          description: Project ID of this Cluster that other objects will use to refer to it
+          default: crossplane-playground
+          validation:
+          - required: true
+            customError: Project ID is required.
       - title: Cluster Info
         description: Information about this cluster
         items:
@@ -146,8 +159,7 @@ spec:
                                 description: Prometheus operator version to run.
                   networkRef:
                     type: object
-                    description: "A reference to the Network object that this cluster should be
-                    connected to."
+                    description: "A reference to the Network object that this cluster should be connected to."
                     properties:
                       id:
                         type: string
