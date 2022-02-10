@@ -12,7 +12,5 @@ spec:
     nodes:
       count: 1
       size: small
-    networkRef:
-      id: vault-on-gke-network
   writeConnectionSecretToRef:
     name: cluster-conn

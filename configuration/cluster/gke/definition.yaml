@@ -47,18 +47,7 @@ spec:
                     required:
                     - count
                     - size
-                  networkRef:
-                    type: object
-                    description: "A reference to the Network object that this cluster should be
-                    connected to."
-                    properties:
-                      id:
-                        type: string
-                        description: ID of the Network object this ref points to.
-                    required:
-                    - id
                 required:
                 - nodes
-                - networkRef
             required:
             - parameters

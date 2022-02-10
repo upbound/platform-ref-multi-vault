@@ -40,9 +40,9 @@ spec:
         - fromFieldPath: spec.writeConnectionSecretToRef.namespace
           toFieldPath: spec.writeConnectionSecretToRef.namespace
         # Create this cluster in the Network and Subnetwork referenced by network ID
-        - fromFieldPath: "spec.parameters.networkRef.id"
+        - fromFieldPath: "spec.id"
           toFieldPath: spec.forProvider.networkSelector.matchLabels[networks.gcp.vaultongke.crossplane.io/network-id]
-        - fromFieldPath: "spec.parameters.networkRef.id"
+        - fromFieldPath: "spec.id"
           toFieldPath: spec.forProvider.subnetworkSelector.matchLabels[networks.gcp.vaultongke.crossplane.io/network-id]
         - fromFieldPath: spec.projectID
           toFieldPath: spec.forProvider.workloadIdentityConfig.workloadPool

@@ -36,8 +36,6 @@ spec:
           toFieldPath: spec.parameters.nodes.count
         - fromFieldPath: spec.parameters.nodes.size
           toFieldPath: spec.parameters.nodes.size
-        - fromFieldPath: spec.parameters.networkRef.id
-          toFieldPath: spec.parameters.networkRef.id
     - base:
         apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
         kind: Vaults
@@ -48,3 +46,11 @@ spec:
           toFieldPath: spec.projectID
         - fromFieldPath: spec.id
           toFieldPath: spec.providerConfigRef.name
+    - base:
+        apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+        kind: CompositeNetwork
+      patches:
+        - fromFieldPath: "spec.id"
+          toFieldPath: "spec.id"
+        - fromFieldPath: "spec.id"
+          toFieldPath: "spec.clusterRef.id"
