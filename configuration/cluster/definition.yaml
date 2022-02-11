@@ -69,19 +69,6 @@ metadata:
           validation:
           - required: true
             customError: Node size is required.
-      - title: Cluster Networking
-        description: Select a network fabric for your cluster
-        items:
-        - name: networkRef
-          controlType: singleInput
-          type: string
-          path: ".spec.parameters.networkRef.id"
-          title: Network Ref
-          description: Network fabric to connect the database to
-          default: vault-on-gke-network
-          validation:
-          - required: true
-            customError: Network ref is required.
       - title: Cluster Services
         description: Configure cluster services and operators
         items:
@@ -157,18 +144,8 @@ spec:
                               version:
                                 type: string
                                 description: Prometheus operator version to run.
-                  networkRef:
-                    type: object
-                    description: "A reference to the Network object that this cluster should be connected to."
-                    properties:
-                      id:
-                        type: string
-                        description: ID of the Network object this ref points to.
-                    required:
-                    - id
                 required:
                 - nodes
-                - networkRef
             required:
             - id
             - parameters
