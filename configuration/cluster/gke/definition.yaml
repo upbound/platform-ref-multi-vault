@@ -1,11 +1,11 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: gke.gcp.vaultongke.crossplane.io
+  name: gke.gcp.multivault.crossplane.io
 spec:
   connectionSecretKeys:
   - kubeconfig
-  group: gcp.vaultongke.crossplane.io
+  group: gcp.multivault.crossplane.io
   names:
     kind: GKE
     plural: gke

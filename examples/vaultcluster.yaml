@@ -1,4 +1,4 @@
-apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+apiVersion: gcp.multivault.crossplane.io/v1alpha1
 kind: VaultCluster
 metadata:
   name: vault-on-gke-cluster
