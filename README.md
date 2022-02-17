@@ -23,7 +23,7 @@ cp kubectl-crossplane /usr/local/bin
 #### Install the Platform Configuration
 
 ```console
-CONFIGURATION_PACKAGE=registry.upbound.io/hasan/vault-on-gke:v0.1.0
+CONFIGURATION_PACKAGE=registry.upbound.io/upbound/platform-ref-multi-vault:v0.1.0
 
 kubectl crossplane install configuration ${CONFIGURATION_PACKAGE}
 kubectl get pkg
