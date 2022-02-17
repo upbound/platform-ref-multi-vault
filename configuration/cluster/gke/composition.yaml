@@ -1,13 +1,13 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: gke.gcp.vaultongke.crossplane.io
+  name: gke.gcp.multivault.crossplane.io
   labels:
     provider: GCP
 spec:
   writeConnectionSecretsToNamespace: crossplane-system
   compositeTypeRef:
-    apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+    apiVersion: gcp.multivault.crossplane.io/v1alpha1
     kind: GKE
   resources:
     - base:
@@ -41,9 +41,9 @@ spec:
           toFieldPath: spec.writeConnectionSecretToRef.namespace
         # Create this cluster in the Network and Subnetwork referenced by network ID
         - fromFieldPath: "spec.id"
-          toFieldPath: spec.forProvider.networkSelector.matchLabels[networks.gcp.vaultongke.crossplane.io/network-id]
+          toFieldPath: spec.forProvider.networkSelector.matchLabels[networks.gcp.multivault.crossplane.io/network-id]
         - fromFieldPath: "spec.id"
-          toFieldPath: spec.forProvider.subnetworkSelector.matchLabels[networks.gcp.vaultongke.crossplane.io/network-id]
+          toFieldPath: spec.forProvider.subnetworkSelector.matchLabels[networks.gcp.multivault.crossplane.io/network-id]
         - fromFieldPath: spec.projectID
           toFieldPath: spec.forProvider.workloadIdentityConfig.workloadPool
           transforms:

@@ -1,13 +1,13 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: gcp.compositenetworks.gcp.vaultongke.crossplane.io
+  name: gcp.compositenetworks.gcp.multivault.crossplane.io
   labels:
     provider: GCP
 spec:
   writeConnectionSecretsToNamespace: crossplane-system
   compositeTypeRef:
-    apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+    apiVersion: gcp.multivault.crossplane.io/v1alpha1
     kind: CompositeNetwork
   resources:
     - base:
@@ -21,7 +21,7 @@ spec:
           reclaimPolicy: Delete
       patches:
         - fromFieldPath: spec.id
-          toFieldPath: metadata.labels[networks.gcp.vaultongke.crossplane.io/network-id]
+          toFieldPath: metadata.labels[networks.gcp.multivault.crossplane.io/network-id]
     - base:
         apiVersion: compute.gcp.crossplane.io/v1beta1
         kind: Subnetwork
@@ -43,4 +43,4 @@ spec:
           reclaimPolicy: Delete
       patches:
         - fromFieldPath: spec.id
-          toFieldPath: metadata.labels[networks.gcp.vaultongke.crossplane.io/network-id]
+          toFieldPath: metadata.labels[networks.gcp.multivault.crossplane.io/network-id]

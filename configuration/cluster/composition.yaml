@@ -1,17 +1,17 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: vaultclusters.gcp.vaultongke.crossplane.io
+  name: vaultclusters.gcp.multivault.crossplane.io
   labels:
     provider: GCP
 spec:
   writeConnectionSecretsToNamespace: crossplane-system
   compositeTypeRef:
-    apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+    apiVersion: gcp.multivault.crossplane.io/v1alpha1
     kind: VaultOnGKE
   resources:
     - base:
-        apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+        apiVersion: gcp.multivault.crossplane.io/v1alpha1
         kind: GKE
       connectionDetails:
         - fromConnectionSecretKey: kubeconfig
@@ -37,7 +37,7 @@ spec:
         - fromFieldPath: spec.parameters.nodes.size
           toFieldPath: spec.parameters.nodes.size
     - base:
-        apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+        apiVersion: gcp.multivault.crossplane.io/v1alpha1
         kind: Vaults
       patches:
         - fromFieldPath: metadata.name
@@ -47,7 +47,7 @@ spec:
         - fromFieldPath: spec.id
           toFieldPath: spec.providerConfigRef.name
     - base:
-        apiVersion: gcp.vaultongke.crossplane.io/v1alpha1
+        apiVersion: gcp.multivault.crossplane.io/v1alpha1
         kind: CompositeNetwork
       patches:
         - fromFieldPath: "spec.id"

@@ -1,7 +1,7 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: vaultongkes.gcp.vaultongke.crossplane.io
+  name: vaultongkes.gcp.multivault.crossplane.io
   annotations:
     upbound.io/ui-schema: |-
       ---
@@ -69,25 +69,13 @@ metadata:
           validation:
           - required: true
             customError: Node size is required.
-      - title: Cluster Services
-        description: Configure cluster services and operators
-        items:
-        - name: promVersion
-          controlType: singleInput
-          type: string
-          path: ".spec.parameters.services.operators.prometheus.version"
-          title: Prometheus Chart Version
-          description: The version of kube-prometheus-stack chart to install
-          default: 10.1.0
-          validation:
-          - required: false
 spec:
   claimNames:
     kind: VaultCluster
     plural: vaultclusters
   connectionSecretKeys:
   - kubeconfig
-  group: gcp.vaultongke.crossplane.io
+  group: gcp.multivault.crossplane.io
   names:
     kind: VaultOnGKE
     plural: vaultongkes
@@ -129,21 +117,6 @@ spec:
                     required:
                     - count
                     - size
-                  services:
-                    type: object
-                    description: Services configuration parameters.
-                    properties:
-                      operators:
-                        type: object
-                        description: Configuration for operators.
-                        properties:
-                          prometheus:
-                            type: object
-                            description: Configuration for the Prometheus operator.
-                            properties:
-                              version:
-                                type: string
-                                description: Prometheus operator version to run.
                 required:
                 - nodes
             required:

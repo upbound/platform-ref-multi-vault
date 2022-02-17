@@ -1,12 +1,12 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: compositenetworks.gcp.vaultongke.crossplane.io
+  name: compositenetworks.gcp.multivault.crossplane.io
 spec:
   claimNames:
     kind: Network
     plural: networks
-  group: gcp.vaultongke.crossplane.io
+  group: gcp.multivault.crossplane.io
   names:
     kind: CompositeNetwork
     plural: compositenetworks

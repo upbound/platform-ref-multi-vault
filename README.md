@@ -1,10 +1,9 @@
-# Crossplane Configuration for HashiCorp Vault on GKE
+# Crossplane Configuration for HashiCorp Vault
 
 This Crossplane Configuration defines compositions to run
-a highly available Vault on GKE backed by a GCS bucket, configured to
-auto unseal with Cloud KMS and authenticate using GCP workload identity.
+a highly available Vault.
 
-It provides a control plane API to provision fully configured GKE clusters,
+Currently, this configuration only supports GCP. It provides a control plane API to provision fully configured GKE clusters,
 with secure networking, and a highly available Vault backed by a GCS bucket and
 configured to auto unseal with Cloud KMS using GCP workload identity -- all
 composed using cloud service primitives from the [Crossplane GCP
@@ -55,14 +54,14 @@ kubectl apply -f examples/provider-default-gcp.yaml
 
 ## Building Configuration Package
 
-Create a `Repository` called `vault-on-gke` in your Upbound Cloud `Organization`.
+Create a `Repository` called `platform-ref-multi-vault` in your Upbound Cloud `Organization`.
 
 Set these to match your settings:
 
 ```console
 UPBOUND_ORG=acme
 UPBOUND_ACCOUNT_EMAIL=me@acme.io
-REPO=vault-on-gke
+REPO=platform-ref-multi-vault
 VERSION_TAG=v0.0.1
 REGISTRY=registry.upbound.io
 PLATFORM_CONFIG=${REGISTRY:+$REGISTRY/}${UPBOUND_ORG}/${REPO}:${VERSION_TAG}
@@ -71,8 +70,8 @@ PLATFORM_CONFIG=${REGISTRY:+$REGISTRY/}${UPBOUND_ORG}/${REPO}:${VERSION_TAG}
 Clone the GitHub repo.
 
 ```console
-git clone https://github.com/upbound/vault-on-gke.git
-cd vault-on-gke
+git clone https://github.com/upbound/platform-ref-multi-vault.git
+cd platform-ref-multi-vault
 ```
 
 Login to your container registry.
