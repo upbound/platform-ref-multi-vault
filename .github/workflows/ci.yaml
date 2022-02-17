@@ -36,12 +36,12 @@ jobs:
         with:
           channel: stable
           version: current
-          command: build configuration -f ${{ github.workspace }} --name package.xpkg --ignore '.github/*,.github/*/*,examples/*,hack/*'
+          command: build configuration -f ${{ github.workspace }} --name package.xpkg --package-root configuration
       - name: Push
         uses: crossplane-contrib/xpkg-action@v0.2.0
         with:
-          command: push configuration -f package.xpkg registry.upbound.io/upbound/platform-ref-multi-vault:${{ steps.tagger.outputs.VERSION_TAG }}
+          command: push configuration -f configuration/package.xpkg registry.upbound.io/upbound/platform-ref-multi-vault:${{ steps.tagger.outputs.VERSION_TAG }}
       - name: Push Latest
         uses: crossplane-contrib/xpkg-action@v0.2.0
         with:
-          command: push configuration -f package.xpkg registry.upbound.io/upbound/platform-ref-multi-vault
+          command: push configuration -f configuration/package.xpkg registry.upbound.io/upbound/platform-ref-multi-vault
